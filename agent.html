@@ -614,6 +614,15 @@
         </div>
       </div>
 
+      <div id="glassdoor-block" style="display:none;background:white;border:0.5px solid var(--light-line);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);">Glassdoor — what people are saying</span>
+          <span id="glassdoor-rating" style="font-size:13px;font-weight:500;color:var(--mid);"></span>
+        </div>
+        <div id="glassdoor-reviews" style="font-size:14px;line-height:1.75;color:var(--mid);white-space:pre-wrap;"></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">Verify rating and quotes directly on Glassdoor before referencing in outreach.</p>
+      </div>
+
       <div class="section-divider"></div>
 
       <div class="message-block">
@@ -785,7 +794,7 @@ async function runAgent() {
     ? `Find recent LinkedIn posts, interviews or public statements by ${contactRef} in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`
     : `First identify who founded and currently leads ${companyRef}. Then find their recent LinkedIn posts, interviews or public statements in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture, scaling or personal growth. Include their name in your response.${linkedInNote}`);
   await run('linkedin_activity', 'Searching LinkedIn activity...', `Search for recent publicly visible LinkedIn activity, announcements or posts from ${companyRef} leadership team in 2025 and 2026. Look for: leadership changes, new appointments, company announcements, cultural changes, expansion plans, or any posts where senior people share challenges or milestones. Include any names and roles mentioned.${linkedInNote}`);
-  await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews and ratings for ${companyRef}. Summarise recurring themes around leadership, management, culture, communication and any mentions of growing pains or change.${linkedInNote}`);
+  await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews for ${companyRef}. I need: (1) the current overall rating if available, (2) the actual text from recent reviews — quote specific pros and cons that employees have written, especially around leadership, management, culture, career progression, communication, and any sense of the company changing. Do NOT just give me a number — give me what people are actually saying in their own words.${linkedInNote}`);
   await run('news', 'Searching press & news...', `Find recent news and press coverage of ${companyRef} in 2024-2025. Include challenges, milestones, strategic changes and notable leadership quotes.${linkedInNote}`);
   await run('jobs', 'Searching job listings...', `Find current job listings at ${companyRef}. Focus on people, culture, HR, Chief of Staff or leadership roles. Note if hiring multiple senior roles simultaneously.${linkedInNote}`);
 
@@ -813,7 +822,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
 - Never quote or paraphrase something a person said unless it is explicitly in the search results above.
 
 Return this exact JSON:
-{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list any open senior roles found (Head of People, Chief of Staff, VP-level etc) or 'None found' if none","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
+{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list any open senior roles found or 'None found'","glassdoor_rating":"the rating as stated e.g. 3.3/5 or 'Not found'","glassdoor_summary":"3-5 bullet points of actual themes from reviews — what are people saying in their own words about leadership, culture, management. Quote specific language where possible.","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
 
 HOT=2+ HIGH triggers. WARM=1 HIGH or 2+ MEDIUM. WATCH=LOW only.` }], 1000, antKey);
     scoreData = JSON.parse(raw.replace(/```json|```/g, '').trim());
@@ -901,6 +910,12 @@ function renderResults(d, message, companyName) {
   document.getElementById('meta-funding').textContent = d.funding_status;
   document.getElementById('meta-trigger').textContent = d.primary_trigger;
   document.getElementById('meta-roles').textContent = d.open_roles || 'None found';
+
+  if (d.glassdoor_summary && d.glassdoor_summary !== 'Not found') {
+    document.getElementById('glassdoor-block').style.display = 'block';
+    document.getElementById('glassdoor-rating').textContent = d.glassdoor_rating || '';
+    document.getElementById('glassdoor-reviews').textContent = d.glassdoor_summary;
+  }
 
   const paras = message.split('\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');
   document.getElementById('message-body').innerHTML = paras;

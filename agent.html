@@ -554,7 +554,7 @@
       <button class="search-btn" id="run-btn" onclick="runAgent()">Research ↗</button>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-24px;margin-bottom:32px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-24px;margin-bottom:16px;">
       <div>
         <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Company LinkedIn <span style="opacity:0.5;">(recommended)</span></label>
         <input type="text" id="company-linkedin" placeholder="linkedin.com/company/..." style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;" />
@@ -563,6 +563,11 @@
         <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Key Contact LinkedIn <span style="opacity:0.5;">(recommended)</span></label>
         <input type="text" id="contact-linkedin" placeholder="linkedin.com/in/..." style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;" />
       </div>
+    </div>
+
+    <div style="margin-bottom:32px;">
+      <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Your own research <span style="opacity:0.5;">(paste LinkedIn posts, news snippets, anything you've spotted manually)</span></label>
+      <textarea id="extra-context" placeholder="e.g. CEO just posted about a leadership transition... new COO announced... Glassdoor review mentioning culture issues... anything you've found that the agent can't access directly." style="width:100%;padding:12px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;resize:vertical;min-height:90px;line-height:1.6;"></textarea>
     </div>
 
     <div class="error-box" id="error-box"></div>
@@ -627,9 +632,12 @@ const STEPS = [
   { id: 'funding', label: 'Funding & growth' },
   { id: 'hires', label: 'Senior hires' },
   { id: 'posts', label: 'Founder posts' },
+  { id: 'linkedin_activity', label: 'LinkedIn activity' },
   { id: 'glassdoor', label: 'Glassdoor signals' },
   { id: 'news', label: 'Press & news' },
   { id: 'jobs', label: 'Job listings' },
+  { id: 'synthesise', label: 'Synthesising signals' },
+  { id: 'message', label: 'Writing message' }
   { id: 'synthesise', label: 'Synthesising signals' },
   { id: 'message', label: 'Writing message' }
 ];
@@ -715,6 +723,7 @@ async function runAgent() {
   const antKey = document.getElementById('ant-key').value.trim();
   const companyLinkedIn = document.getElementById('company-linkedin').value.trim();
   const contactLinkedIn = document.getElementById('contact-linkedin').value.trim();
+  const extraContext = document.getElementById('extra-context').value.trim();
   const errBox = document.getElementById('error-box');
   errBox.style.display = 'none';
 
@@ -755,8 +764,9 @@ async function runAgent() {
   await run('funding', 'Searching funding & growth...', `Find recent funding rounds, investment announcements and growth news for ${companyRef} in 2024-2025. Include round size, investors, growth plans and headcount changes.${linkedInNote}`);
   await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at ${companyRef} in 2024-2025. First identify who currently founded and leads the company, then look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many new senior people have joined and how recently.${linkedInNote}`);
   await run('posts', 'Searching founder posts...', contactLinkedIn 
-    ? `Find recent LinkedIn posts, interviews or public statements by ${contactRef} in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`
-    : `First identify who founded and currently leads ${companyRef}. Then find their recent LinkedIn posts, interviews or public statements in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture, scaling or personal growth. Include their name in your response.${linkedInNote}`);
+    ? `Find recent LinkedIn posts, interviews or public statements by ${contactRef} in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`
+    : `First identify who founded and currently leads ${companyRef}. Then find their recent LinkedIn posts, interviews or public statements in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture, scaling or personal growth. Include their name in your response.${linkedInNote}`);
+  await run('linkedin_activity', 'Searching LinkedIn activity...', `Search for recent publicly visible LinkedIn activity, announcements or posts from ${companyRef} leadership team in 2025 and 2026. Look for: leadership changes, new appointments, company announcements, cultural changes, expansion plans, or any posts where senior people share challenges or milestones. Include any names and roles mentioned.${linkedInNote}`);
   await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews and ratings for ${companyRef}. Summarise recurring themes around leadership, management, culture, communication and any mentions of growing pains or change.${linkedInNote}`);
   await run('news', 'Searching press & news...', `Find recent news and press coverage of ${companyRef} in 2024-2025. Include challenges, milestones, strategic changes and notable leadership quotes.${linkedInNote}`);
   await run('jobs', 'Searching job listings...', `Find current job listings at ${companyRef}. Focus on people, culture, HR, Chief of Staff or leadership roles. Note if hiring multiple senior roles simultaneously.${linkedInNote}`);
@@ -771,12 +781,14 @@ async function runAgent() {
 FUNDING: ${searches.funding}
 HIRES: ${searches.hires}
 FOUNDER POSTS: ${searches.posts}
+LINKEDIN ACTIVITY: ${searches.linkedin_activity}
 GLASSDOOR: ${searches.glassdoor}
 NEWS: ${searches.news}
 JOBS: ${searches.jobs}
+${extraContext ? `\nADDITIONAL CONTEXT PROVIDED BY USER (treat this as highest priority — it is first-hand research):\n${extraContext}` : ''}
 
 Return this exact JSON:
-{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 specific sentences about what was found","key_facts":["fact1","fact2","fact3"]}
+{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 specific sentences about what was found. If user-provided context is present, prioritise it and reference it specifically.","key_facts":["fact1","fact2","fact3"]}
 
 HOT=2+ HIGH triggers. WARM=1 HIGH or 2+ MEDIUM. WATCH=LOW only.` }], 1000, antKey);
     scoreData = JSON.parse(raw.replace(/```json|```/g, '').trim());
@@ -847,7 +859,27 @@ function renderResults(d, message) {
   const paras = message.split('\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');
   document.getElementById('message-body').innerHTML = paras;
 
-  const allCitations = Object.values(allSources).flat().filter((url, i, arr) => url && arr.indexOf(url) === i);
+  const companySlug = company.toLowerCase().replace(/\s+/g, '');
+  const blocklist = ['toyota.com', 'amazon.com', 'google.com', 'facebook.com', 'wikipedia.org', 'apple.com', 'microsoft.com', 'youtube.com', 'twitter.com', 'instagram.com'];
+  const evidenceText = (d.evidence + ' ' + (d.key_facts||[]).join(' ')).toLowerCase();
+
+  const allCitations = Object.values(allSources).flat().filter((url, i, arr) => {
+    if (!url) return false;
+    if (arr.indexOf(url) !== i) return false;
+    if (blocklist.some(b => url.includes(b))) return false;
+    try {
+      const domain = new URL(url).hostname.replace('www.','');
+      const domainParts = domain.split('.');
+      const siteName = domainParts[0];
+      return evidenceText.includes(siteName) || 
+             url.includes('linkedin') || 
+             url.includes('glassdoor') ||
+             url.includes(companySlug) ||
+             url.includes('techcrunch') ||
+             url.includes('sifted') ||
+             url.includes('crunchbase');
+    } catch(e) { return false; }
+  });
   const sourcesEl = document.getElementById('sources-section');
   if (allCitations.length > 0) {
     sourcesEl.style.display = 'block';

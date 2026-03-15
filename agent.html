@@ -615,6 +615,8 @@
         <div class="message-body" id="message-body"></div>
       </div>
 
+      <div id="sources-section" style="display:none;"></div>
+
     </div>
 
   </main>
@@ -672,15 +674,23 @@ function setStep(id, state) {
   if (el) el.className = 'step ' + state;
 }
 
+const allSources = {};
+
 async function searchPerplexity(query, key) {
   const r = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({ model: 'sonar', messages: [{ role: 'user', content: query }], max_tokens: 800 })
+    body: JSON.stringify({ 
+      model: 'sonar', 
+      messages: [{ role: 'user', content: query + ' Focus on information from 2025 and 2026 only. Ignore anything older than 12 months unless nothing more recent exists.' }], 
+      max_tokens: 800,
+      return_citations: true
+    })
   });
   if (!r.ok) throw new Error('Perplexity ' + r.status);
   const d = await r.json();
-  return d.choices?.[0]?.message?.content || '';
+  const citations = d.citations || [];
+  return { content: d.choices?.[0]?.message?.content || '', citations };
 }
 
 async function callClaude(messages, maxTokens, key) {
@@ -725,12 +735,20 @@ async function runAgent() {
   document.getElementById('progress-company').textContent = company;
   renderSteps();
 
+  Object.keys(allSources).forEach(k => delete allSources[k]);
   const searches = {};
 
   const run = async (id, label, query) => {
     setStep(id, 'active');
     document.getElementById('progress-label').textContent = label;
-    try { searches[id] = await searchPerplexity(query, pplxKey); setStep(id, 'done'); }
+    try { 
+      const result = await searchPerplexity(query, pplxKey); 
+      searches[id] = result.content;
+      if (result.citations && result.citations.length) {
+        allSources[id] = result.citations;
+      }
+      setStep(id, 'done'); 
+    }
     catch(e) { searches[id] = 'No data.'; setStep(id, 'err'); }
   };
 
@@ -776,11 +794,16 @@ HOT=2+ HIGH triggers. WARM=1 HIGH or 2+ MEDIUM. WATCH=LOW only.` }], 1000, antKe
   let messageText = '';
   try {
     messageText = await callClaude([{ role: 'user', content: `Write a personalised LinkedIn outreach message for "${company}".
+
 PRIMARY CHALLENGE: ${scoreData.primary_trigger}
 EVIDENCE: ${scoreData.evidence}
 KEY FACTS: ${(scoreData.key_facts||[]).join(', ')}
 BEST CONTACT: ${scoreData.best_contact}
-Follow the 4-part structure. Short paragraphs, 2-3 sentences max. Sound like a thoughtful human.` }], 500, antKey);
+
+IMPORTANT — HOW TO FRAME WHAT WE DO:
+Do not offer generic coaching or consultancy. Reference the specific depth of what we do — we help people understand their core motivations and what drives them, what quietly drains them, and how those patterns show up in their key working relationships. This is what makes the difference at senior level — not skills or processes, but the invisible human dynamics underneath. Frame it as going underneath the surface to where things actually shift.
+
+Follow the 4-part structure. Short paragraphs, 2-3 sentences max. Sound like a thoughtful human who has been in the room.` }], 600, antKey);
     setStep('message', 'done');
   } catch(e) {
     setStep('message', 'err');
@@ -823,6 +846,21 @@ function renderResults(d, message) {
 
   const paras = message.split('\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');
   document.getElementById('message-body').innerHTML = paras;
+
+  const allCitations = Object.values(allSources).flat().filter((url, i, arr) => url && arr.indexOf(url) === i);
+  const sourcesEl = document.getElementById('sources-section');
+  if (allCitations.length > 0) {
+    sourcesEl.style.display = 'block';
+    sourcesEl.innerHTML = `
+      <div style="margin-top:24px;padding-top:20px;border-top:0.5px solid var(--light-line);">
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sources used — verify before sending</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          ${allCitations.map(url => `<a href="${url}" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none;word-break:break-all;padding:6px 10px;background:white;border:0.5px solid var(--light-line);border-radius:5px;display:block;">${url}</a>`).join('')}
+        </div>
+      </div>`;
+  } else {
+    sourcesEl.style.display = 'none';
+  }
 }
 
 function copyMessage() {

@@ -724,8 +724,10 @@ async function runAgent() {
   };
 
   await run('funding', 'Searching funding & growth...', `Find recent funding rounds, investment announcements and growth news for ${companyRef} in 2024-2025. Include round size, investors, growth plans and headcount changes.`);
-  await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at ${companyRef} in 2024-2025. Look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many and how recently.`);
-  await run('posts', 'Searching founder posts...', `Find recent LinkedIn posts, interviews or public statements by ${contactRef} at ${companyRef} in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`);
+  await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at ${companyRef} in 2024-2025. First identify who currently leads the company, then look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many new senior people have joined and how recently.`);
+  await run('posts', 'Searching founder posts...', contactLinkedIn 
+    ? `Find recent LinkedIn posts, interviews or public statements by ${contactRef} in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`
+    : `First identify who the CEO or founder of ${companyRef} is. Then find their recent LinkedIn posts, interviews or public statements in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture, scaling or personal growth. Include their name in your response.`);
   await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews and ratings for ${companyRef}. Summarise recurring themes around leadership, management, culture, communication and any mentions of growing pains or change.`);
   await run('news', 'Searching press & news...', `Find recent news and press coverage of ${companyRef} in 2024-2025. Include challenges, milestones, strategic changes and notable leadership quotes.`);
   await run('jobs', 'Searching job listings...', `Find current job listings at ${companyRef}. Focus on people, culture, HR, Chief of Staff or leadership roles. Note if hiring multiple senior roles simultaneously.`);

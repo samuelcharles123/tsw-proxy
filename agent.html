@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -382,6 +383,9 @@
     font-size: 14px;
     line-height: 1.75;
     color: var(--mid);
+    word-break: normal;
+    overflow-wrap: break-word;
+    white-space: normal;
   }
 
   .meta-row {
@@ -539,8 +543,19 @@
     </div>
 
     <div class="search-bar">
-      <input type="text" id="company-input" placeholder="Enter a company name, e.g. Pleo, Wayfindr, Depop..." />
+      <input type="text" id="company-input" placeholder="Enter a company name, e.g. Creature Comforts, Pleo, Depop..." />
       <button class="search-btn" id="run-btn" onclick="runAgent()">Research ↗</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-24px;margin-bottom:32px;">
+      <div>
+        <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Company LinkedIn <span style="opacity:0.5;">(recommended)</span></label>
+        <input type="text" id="company-linkedin" placeholder="linkedin.com/company/..." style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;" />
+      </div>
+      <div>
+        <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Key Contact LinkedIn <span style="opacity:0.5;">(recommended)</span></label>
+        <input type="text" id="contact-linkedin" placeholder="linkedin.com/in/..." style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;" />
+      </div>
     </div>
 
     <div class="error-box" id="error-box"></div>
@@ -681,12 +696,17 @@ async function runAgent() {
   const company = document.getElementById('company-input').value.trim();
   const pplxKey = document.getElementById('pplx-key').value.trim();
   const antKey = document.getElementById('ant-key').value.trim();
+  const companyLinkedIn = document.getElementById('company-linkedin').value.trim();
+  const contactLinkedIn = document.getElementById('contact-linkedin').value.trim();
   const errBox = document.getElementById('error-box');
   errBox.style.display = 'none';
 
   if (!company) { showError('Please enter a company name.'); return; }
   if (!pplxKey || !pplxKey.startsWith('pplx-')) { showError('Please enter your Perplexity API key in the sidebar.'); return; }
   if (!antKey || !antKey.startsWith('sk-ant-')) { showError('Please enter your Anthropic API key in the sidebar.'); return; }
+
+  const companyRef = companyLinkedIn ? `"${company}" (LinkedIn: ${companyLinkedIn})` : `"${company}" UK company`;
+  const contactRef = contactLinkedIn ? `the person at ${contactLinkedIn}` : `the founder or CEO of "${company}"`;
 
   document.getElementById('run-btn').disabled = true;
   document.getElementById('results').style.display = 'none';
@@ -703,12 +723,12 @@ async function runAgent() {
     catch(e) { searches[id] = 'No data.'; setStep(id, 'err'); }
   };
 
-  await run('funding', 'Searching funding & growth...', `Find recent funding rounds, investment announcements and growth news for the UK company "${company}" in 2024-2025. Include round size, investors, growth plans and headcount changes.`);
-  await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at UK company "${company}" in 2024-2025. Look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many and how recently.`);
-  await run('posts', 'Searching founder posts...', `Find recent LinkedIn posts, interviews or public statements by founders or CEO of UK company "${company}" in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`);
-  await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews and ratings for UK company "${company}". Summarise recurring themes around leadership, management, culture, communication and any mentions of growing pains or change.`);
-  await run('news', 'Searching press & news...', `Find recent news and press coverage of UK company "${company}" in 2024-2025. Include challenges, milestones, strategic changes and notable leadership quotes.`);
-  await run('jobs', 'Searching job listings...', `Find current job listings at UK company "${company}". Focus on people, culture, HR, Chief of Staff or leadership roles. Note if hiring multiple senior roles simultaneously.`);
+  await run('funding', 'Searching funding & growth...', `Find recent funding rounds, investment announcements and growth news for ${companyRef} in 2024-2025. Include round size, investors, growth plans and headcount changes.`);
+  await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at ${companyRef} in 2024-2025. Look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many and how recently.`);
+  await run('posts', 'Searching founder posts...', `Find recent LinkedIn posts, interviews or public statements by ${contactRef} at ${companyRef} in 2024-2025. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`);
+  await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews and ratings for ${companyRef}. Summarise recurring themes around leadership, management, culture, communication and any mentions of growing pains or change.`);
+  await run('news', 'Searching press & news...', `Find recent news and press coverage of ${companyRef} in 2024-2025. Include challenges, milestones, strategic changes and notable leadership quotes.`);
+  await run('jobs', 'Searching job listings...', `Find current job listings at ${companyRef}. Focus on people, culture, HR, Chief of Staff or leadership roles. Note if hiring multiple senior roles simultaneously.`);
 
   setStep('synthesise', 'active');
   document.getElementById('progress-label').textContent = 'Claude is synthesising all signals...';

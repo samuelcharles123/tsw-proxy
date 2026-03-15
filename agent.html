@@ -608,6 +608,10 @@
             <div class="meta-value" id="meta-trigger"></div>
           </div>
         </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--light-line);">
+          <div class="meta-label" style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Open senior roles</div>
+          <div id="meta-roles" style="font-size:13px;color:var(--dark);line-height:1.7;"></div>
+        </div>
       </div>
 
       <div class="section-divider"></div>
@@ -801,8 +805,15 @@ NEWS: ${searches.news}
 JOBS: ${searches.jobs}
 ${extraContext ? `\nADDITIONAL CONTEXT PROVIDED BY USER (treat this as highest priority — it is first-hand research):\n${extraContext}` : ''}
 
+CRITICAL ANTI-HALLUCINATION RULES:
+- Only include facts that are explicitly stated in the search data above. Do NOT infer, imagine, or fill gaps.
+- If you cannot find a specific LinkedIn post, do NOT describe one. Write "No verified LinkedIn posts found."
+- If a fact cannot be traced back to the search data, do NOT include it.
+- For key_facts: only include things directly evidenced above. Prefix any unverified claim with "[UNVERIFIED]".
+- Never quote or paraphrase something a person said unless it is explicitly in the search results above.
+
 Return this exact JSON:
-{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 specific sentences about what was found. If user-provided context is present, prioritise it and reference it specifically.","key_facts":["fact1","fact2","fact3"]}
+{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list any open senior roles found (Head of People, Chief of Staff, VP-level etc) or 'None found' if none","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
 
 HOT=2+ HIGH triggers. WARM=1 HIGH or 2+ MEDIUM. WATCH=LOW only.` }], 1000, antKey);
     scoreData = JSON.parse(raw.replace(/```json|```/g, '').trim());
@@ -839,6 +850,8 @@ CRITICAL STYLE RULES:
 NEVER USE THESE WORDS OR PHRASES — they are internal diagnostic labels, not outreach language:
 "SLT tension", "scaling too fast", "culture breakdown", "founder inflection point", "post-MBO integration", "disconnected team", "leadership development", "coaching", "methodology", "framework", "soulful strategy", "Know Thyself"
 Instead — evoke the feeling of what they're experiencing without labelling it.
+
+NEVER FABRICATE. If a key fact is marked [UNVERIFIED] do not reference it in the message at all. Only use confirmed, sourced information as specific observations. If little is verified, keep the observation general rather than specific.
 
 EXAMPLE WRONG: "I've been following your journey and what strikes me about your approach is how you've built something genuinely different..."
 EXAMPLE RIGHT: "You've built something rare. That takes a different kind of leadership."
@@ -879,10 +892,15 @@ function renderResults(d, message, companyName) {
     </div>`
   ).join('');
 
-  document.getElementById('evidence-text').innerHTML = '<p style="font-size:14px;line-height:1.75;color:var(--mid);margin:0;white-space:normal;word-break:normal;">' + d.evidence + '</p>';
+  const evidenceHtml = d.evidence || '';
+  const hasUnverified = evidenceHtml.includes('[UNVERIFIED]') || (d.key_facts||[]).some(f => f.includes('[UNVERIFIED]'));
+  document.getElementById('evidence-text').innerHTML = 
+    (hasUnverified ? '<div style="font-size:11px;color:var(--warn);background:var(--warn-bg);border:0.5px solid #E8D4A0;border-radius:5px;padding:8px 12px;margin-bottom:12px;letter-spacing:0.05em;">⚠ Some claims could not be verified from sources — review before referencing in your message</div>' : '') +
+    '<p style="font-size:14px;line-height:1.75;color:var(--mid);margin:0;white-space:normal;word-break:normal;">' + evidenceHtml + '</p>';
   document.getElementById('meta-contact').textContent = d.best_contact;
   document.getElementById('meta-funding').textContent = d.funding_status;
   document.getElementById('meta-trigger').textContent = d.primary_trigger;
+  document.getElementById('meta-roles').textContent = d.open_roles || 'None found';
 
   const paras = message.split('\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');
   document.getElementById('message-body').innerHTML = paras;

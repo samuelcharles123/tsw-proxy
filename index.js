@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 app.use(express.json());
 
@@ -8,6 +9,10 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
+});
+
+app.get('/agent', (req, res) => {
+  res.sendFile(path.join(__dirname, 'agent.html'));
 });
 
 app.post('/message', async (req, res) => {

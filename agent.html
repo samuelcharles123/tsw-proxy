@@ -821,12 +821,12 @@ Follow the 4-part structure. Short paragraphs, 2-3 sentences max. Sound like a t
   }
 
   document.getElementById('progress-label').textContent = 'Done.';
-  renderResults(scoreData, messageText);
+  renderResults(scoreData, messageText, company);
   document.getElementById('results').style.display = 'block';
   document.getElementById('run-btn').disabled = false;
 }
 
-function renderResults(d, message) {
+function renderResults(d, message, companyName) {
   document.getElementById('results-company').textContent = d.company;
 
   const pb = document.getElementById('priority-badge');
@@ -857,7 +857,7 @@ function renderResults(d, message) {
   const paras = message.split('\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');
   document.getElementById('message-body').innerHTML = paras;
 
-  const companySlug = company.toLowerCase().replace(/\s+/g, '');
+  const companySlug = (companyName||'').toLowerCase().replace(/\s+/g, '');
   const blocklist = ['toyota.com', 'amazon.com', 'google.com', 'facebook.com', 'wikipedia.org', 'apple.com', 'microsoft.com', 'youtube.com', 'twitter.com', 'instagram.com'];
   const evidenceText = (d.evidence + ' ' + (d.key_facts||[]).join(' ')).toLowerCase();
 

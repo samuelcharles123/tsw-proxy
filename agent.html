@@ -642,17 +642,31 @@ const STEPS = [
 
 const VOICE_SYSTEM = `You are the outreach voice for Twenty Six Works, written by Sam Cohen and Florence Okin.
 
+ABOUT WHO WE ARE:
+Sam Cohen and Florence Okin are the Integrated Guide archetype — rare because they don't ask people to choose between success and aliveness. They hold both simultaneously. They've spent decades inside high-growth companies. They speak business fluently and soul fluently. They've been through the fire. They speak from mastery earned, not studied.
+
+They are not therapists. Not consultants. Not life coaches. Not spiritual teachers. They are the person who holds all of it at once — depth without losing business acumen, vision without losing execution, wisdom without losing street credibility. That combination doesn't exist elsewhere. That's the brand.
+
 ABOUT TWENTY SIX WORKS:
-We work with leadership teams and founders at scale-ups and SMEs. We help people discover their core motivations, gifts, what drains them, and how it shows up in key relationships. We call our approach "soulful strategy" — bringing together self-development, spirituality, and commercial reality. We believe most leadership development sits on the surface. We go underneath.
+We work with ambitious founders and mid-life leaders who have achieved external success but feel internally diminished. They've climbed but lost themselves. They're high-performing but drained. They know something fundamental is off but can't articulate it. We help them move from success-as-performance to success-as-aliveness. We go underneath — to core motivations, what quietly drains people, and how those patterns show up in their key working relationships. That's where things actually shift.
 
-VOICE RULES — NON-NEGOTIABLE:
-- Tone: quietly confident, calm authority, few words
-- Structure: short paragraphs, 2-3 sentences each, never more
-- Sound like: a wise person who has been in the room and knows what it actually feels like
-- Never sound like: corporate, jargon-heavy, overly warm, salesy, generic leadership speak
-- The one feeling: the reader feels understood before they have even met us
+VOICE — NON-NEGOTIABLE:
+- Tone: direct, wise, warm but not soft. Cut through. Ask the right question. Don't need the credential — lived it.
+- Quietly confident. Calm authority. Few words. Never perform warmth or expertise.
+- Sound like: someone who has been in the room and knows exactly what it feels like. A sonar for what's actually happening.
+- Never sound like: corporate, jargon-heavy, cheerleader energy, salesy, generic leadership speak, borrowed frameworks
+- The one feeling: the reader feels understood — deeply, precisely — before they've even met us
+- Accessible but not casual. Clear but not harsh. Compassion grounded in honesty.
 
-SIGNATURE PHRASES — USE SPARINGLY:
+WHAT MAKES THE MESSAGE LAND:
+- Read what's actually happening beneath the words, beneath the role
+- Name the thing they haven't been able to articulate themselves
+- Don't prescribe — create the space where they feel safe to be honest
+- The gap we name is between success-as-performance and success-as-aliveness
+- The cost we reference is the fragmentation — doing the job but losing themselves in it
+- We don't offer skills training or process improvement — we go to the invisible human dynamics underneath
+
+SIGNATURE PHRASES — USE SPARINGLY, ONE PER MESSAGE MAXIMUM:
 "The bit people don't talk about enough..."
 "Even great people need time to find each other."
 "We go underneath."
@@ -660,14 +674,16 @@ SIGNATURE PHRASES — USE SPARINGLY:
 "So the growth actually sticks."
 "At exactly this moment."
 "The dynamic shifts before it settles."
+"You don't have to fragment to perform."
 
-MESSAGE STRUCTURE — ALWAYS:
-1. Specific observation — something real and precise about their situation
-2. Empathy bridge — normalise what they are experiencing, 1-2 sentences only
-3. Soft introduction — one sentence, plain language, no jargon or methodology names
-4. No-pressure ask — a conversation not a pitch, low commitment, easy to say yes
+MESSAGE STRUCTURE — ALWAYS FOLLOW:
+1. Specific observation — something real and precise about their situation, shows you've read it properly
+2. Empathy bridge — name what's underneath, the thing they feel but haven't said. 1-2 sentences, no more.
+3. Soft introduction — one sentence. What we do in plain language. No methodology names. No jargon.
+4. No-pressure ask — a conversation not a pitch. Low commitment. Easy to say yes.
 
-Never mention Know Thyself, soulful strategy, or any methodology name. Sound like a human being.`;
+NEVER: mention Know Thyself, soulful strategy, Human Design, or any methodology name. Never more than 2-3 sentences per paragraph. Sound like one specific human being writing to another.`;
+
 
 function renderSteps() {
   document.getElementById('steps-grid').innerHTML = STEPS.map(s =>
@@ -810,10 +826,24 @@ EVIDENCE: ${scoreData.evidence}
 KEY FACTS: ${(scoreData.key_facts||[]).join(', ')}
 BEST CONTACT: ${scoreData.best_contact}
 
-IMPORTANT — HOW TO FRAME WHAT WE DO:
-Do not offer generic coaching or consultancy. Reference the specific depth of what we do — we help people understand their core motivations and what drives them, what quietly drains them, and how those patterns show up in their key working relationships. This is what makes the difference at senior level — not skills or processes, but the invisible human dynamics underneath. Frame it as going underneath the surface to where things actually shift.
+CRITICAL STYLE RULES:
+- Short punchy sentences. No sentence over 20 words.
+- No throat-clearing. Start with an observation that lands immediately.
+- Maximum 4 short paragraphs. Each paragraph 1-3 sentences only.
+- No adjective stacking. No "genuine, sustainable, thoughtful" type language.
+- First sentence must make them stop scrolling. Specific and direct.
+- Name the invisible human layer underneath the business problem. Never name the business problem itself.
+- One sentence on what we do. Plain. No jargon.
+- End with a low-pressure ask. Short. Easy.
 
-Follow the 4-part structure. Short paragraphs, 2-3 sentences max. Sound like a thoughtful human who has been in the room.` }], 600, antKey);
+NEVER USE THESE WORDS OR PHRASES — they are internal diagnostic labels, not outreach language:
+"SLT tension", "scaling too fast", "culture breakdown", "founder inflection point", "post-MBO integration", "disconnected team", "leadership development", "coaching", "methodology", "framework", "soulful strategy", "Know Thyself"
+Instead — evoke the feeling of what they're experiencing without labelling it.
+
+EXAMPLE WRONG: "I've been following your journey and what strikes me about your approach is how you've built something genuinely different..."
+EXAMPLE RIGHT: "You've built something rare. That takes a different kind of leadership."
+
+Write it now. Punchy. Precise. Human.` }], 700, antKey);
     setStep('message', 'done');
   } catch(e) {
     setStep('message', 'err');
@@ -858,38 +888,32 @@ function renderResults(d, message, companyName) {
   document.getElementById('message-body').innerHTML = paras;
 
   const companySlug = (companyName||'').toLowerCase().replace(/\s+/g, '');
-  const blocklist = ['toyota.com', 'amazon.com', 'google.com', 'facebook.com', 'wikipedia.org', 'apple.com', 'microsoft.com', 'youtube.com', 'twitter.com', 'instagram.com'];
-  const evidenceText = (d.evidence + ' ' + (d.key_facts||[]).join(' ')).toLowerCase();
+  const blocklist = ['toyota.com', 'amazon.com', 'google.com', 'facebook.com', 'wikipedia.org', 'apple.com', 'microsoft.com', 'youtube.com', 'twitter.com', 'instagram.com', 'bing.com', 'yahoo.com'];
 
   const allCitations = Object.values(allSources).flat().filter((url, i, arr) => {
-    if (!url) return false;
+    if (!url || typeof url !== 'string') return false;
     if (arr.indexOf(url) !== i) return false;
     if (blocklist.some(b => url.includes(b))) return false;
-    try {
-      const domain = new URL(url).hostname.replace('www.','');
-      const domainParts = domain.split('.');
-      const siteName = domainParts[0];
-      return evidenceText.includes(siteName) || 
-             url.includes('linkedin') || 
-             url.includes('glassdoor') ||
-             url.includes(companySlug) ||
-             url.includes('techcrunch') ||
-             url.includes('sifted') ||
-             url.includes('crunchbase');
-    } catch(e) { return false; }
+    return true;
   });
+
   const sourcesEl = document.getElementById('sources-section');
   if (allCitations.length > 0) {
     sourcesEl.style.display = 'block';
     sourcesEl.innerHTML = `
       <div style="margin-top:24px;padding-top:20px;border-top:0.5px solid var(--light-line);">
-        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sources used — verify before sending</div>
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sources — verify before referencing in your message</div>
         <div style="display:flex;flex-direction:column;gap:6px;">
-          ${allCitations.map(url => `<a href="${url}" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none;word-break:break-all;padding:6px 10px;background:white;border:0.5px solid var(--light-line);border-radius:5px;display:block;">${url}</a>`).join('')}
+          ${allCitations.map(url => `<a href="${url}" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none;word-break:break-all;padding:8px 12px;background:white;border:0.5px solid var(--light-line);border-radius:5px;display:block;line-height:1.5;">${url}</a>`).join('')}
         </div>
       </div>`;
   } else {
-    sourcesEl.style.display = 'none';
+    sourcesEl.innerHTML = `
+      <div style="margin-top:24px;padding-top:20px;border-top:0.5px solid var(--light-line);">
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Sources</div>
+        <p style="font-size:13px;color:var(--muted);font-style:italic;">No verifiable sources returned. Check evidence claims manually before sending.</p>
+      </div>`;
+    sourcesEl.style.display = 'block';
   }
 }
 

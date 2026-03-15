@@ -325,9 +325,10 @@
   /* Trigger grid */
   .triggers-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
     margin-bottom: 24px;
+    width: 100%;
   }
 
   .trigger-card {
@@ -368,6 +369,8 @@
     border-radius: 8px;
     padding: 20px 24px;
     margin-bottom: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .block-label {
@@ -805,7 +808,7 @@ function renderResults(d, message) {
     </div>`
   ).join('');
 
-  document.getElementById('evidence-text').textContent = d.evidence;
+  document.getElementById('evidence-text').innerHTML = '<p style="font-size:14px;line-height:1.75;color:var(--mid);margin:0;white-space:normal;word-break:normal;">' + d.evidence + '</p>';
   document.getElementById('meta-contact').textContent = d.best_contact;
   document.getElementById('meta-funding').textContent = d.funding_status;
   document.getElementById('meta-trigger').textContent = d.primary_trigger;

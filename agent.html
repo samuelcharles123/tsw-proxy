@@ -708,7 +708,7 @@
           <span id="glassdoor-rating" style="font-size:13px;font-weight:500;color:var(--mid);"></span>
         </div>
         <div id="glassdoor-reviews" style="font-size:14px;line-height:1.75;color:var(--mid);white-space:pre-wrap;"></div>
-        <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">Verify rating and quotes directly on Glassdoor before referencing in outreach.</p>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">Always verify directly on Glassdoor before referencing. Search: <strong>glassdoor.co.uk + company name</strong>. If numbers differ from what you see, trust Glassdoor directly over this summary.</p>
       </div>
 
       <div id="health-block" style="display:none;background:white;border:0.5px solid var(--light-line);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem;">
@@ -922,14 +922,15 @@ async function runAgent() {
     ? `Find recent LinkedIn posts, interviews or public statements by ${contactRef} in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`
     : `First identify who founded and currently leads ${companyRef}. Then find their recent LinkedIn posts, interviews or public statements in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture, scaling or personal growth. Include their name in your response.${linkedInNote}`);
   await run('linkedin_activity', 'Searching LinkedIn activity...', `Search for recent publicly visible LinkedIn activity from ${companyRef} leadership team in 2025 and 2026. Look for: leadership changes, new appointments, company announcements, cultural changes, expansion plans, or any posts where senior people share challenges or milestones.${linkedInNote}`);
-  await run('glassdoor', 'Searching Glassdoor...', `Find the Glassdoor profile for ${companyRef}. I need ALL of the following if available:
-1. Overall rating (out of 5)
-2. CEO approval rating (% who approve)
-3. % who would recommend to a friend
-4. Business outlook (positive %)
-5. Ratings by category: Culture & values, Work/life balance, Senior management, Diversity & inclusion, Career opportunities, Compensation & benefits
-6. Number of total reviews
-7. Actual review text — quote specific pros and cons employees have written, especially about leadership, management, culture, communication, and any sense of the company changing. Do NOT just give numbers — give what people are actually saying.${linkedInNote}`);
+  await run('glassdoor', 'Searching Glassdoor...', `Find the Glassdoor profile for ${companyRef}. Search glassdoor.co.uk and glassdoor.com for the company. I need the CURRENT exact data — do not estimate or average:
+1. Overall star rating out of 5 (e.g. 3.6)
+2. Total number of reviews (e.g. 42)
+3. % who would recommend to a friend (e.g. 72%)
+4. CEO approval % (e.g. 64% approve of [CEO name])
+5. Business outlook % positive (e.g. 64%)
+6. Category ratings: Culture & values, Work/life balance, Senior management, Diversity & inclusion, Career opportunities, Compensation & benefits
+7. Recent review themes — quote actual pros and cons employees have written
+If you find the Glassdoor page, report ONLY what is on that page. Do not guess or infer numbers.${linkedInNote}`);
   await run('reviews', 'Searching customer reviews...', `Find customer reviews for ${companyRef} across ALL of these platforms — search each one explicitly:
 - Trustpilot: search uk.trustpilot.com/review/[company domain]
 - Reevo
@@ -1063,7 +1064,7 @@ function renderResults(d, message, companyName) {
     scaling_too_fast: 'Scaling fast',
     culture_breakdown: 'Culture',
     founder_inflection: 'Founder moment',
-    post_mbo_integration: 'Post-MBO',
+    post_mbo_integration: 'Corporate event',
     disconnected_team: 'Disconnected team'
   };
 

@@ -860,7 +860,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
 - Only include facts that are explicitly stated in the search data above. Do NOT infer, imagine, or fill gaps.
 - If you cannot find a specific LinkedIn post, do NOT describe one. Write "No verified LinkedIn posts found."
 - If a fact cannot be traced back to the search data, do NOT include it.
-- For key_facts: only include things directly evidenced above. Prefix any unverified claim with "[UNVERIFIED]".
+- For key_facts: only include things directly evidenced above. Prefix any unverified claim with "[UNVERIFIED]". IMPORTANT: LinkedIn posts are behind a login wall and cannot be read directly — if the search returned content that appears to summarise or quote a LinkedIn post, treat it as [UNVERIFIED] unless it was also covered in a news article or public source. Never present inferred post content as fact.
 - Never quote or paraphrase something a person said unless it is explicitly in the search results above.
 
 Return this exact JSON:
@@ -908,12 +908,19 @@ NEVER USE THESE CLICHÉD ANALOGIES OR PHRASES — they are weak and dilute the m
 Also never make observations that are trying to be clever or insightful but are actually generic — e.g. "Multiple entities showing up in searches creates confusion for clients and candidates" — this is filler, not insight. If you can't say something specific and true, say less.
 Be direct. Say the thing plainly. No metaphors unless they are precise and specific.
 
-NEVER FABRICATE. If a key fact is marked [UNVERIFIED] do not reference it in the message at all. Only use confirmed, sourced information as specific observations. If little is verified, keep the observation general rather than specific.
+NEVER FABRICATE — THIS IS THE MOST IMPORTANT RULE:
+Do not invent specific details about LinkedIn posts, interviews, decisions, or events you were not explicitly given. Do not write things like "Looking at your posts about X" or "I noticed you mentioned Y" unless that exact information appears in the verified key facts above. LinkedIn posts are behind a login wall — Perplexity cannot read them. If you reference a post, you are making it up.
 
+If a key fact is marked [UNVERIFIED] — do not use it. Period.
+If you have no verified specific facts — make the observation general, not specific. "You've been scaling fast" is fine. "I saw your post about losing 20% of the team" when you have no such source is fabrication and will destroy trust.
+
+When in doubt: say less. A short, honest, general message is better than a specific fabricated one.
+
+EXAMPLE WRONG: "Looking at your posts about losing that 20% and the therapy decision..."
 EXAMPLE WRONG: "60% growth while most firms are treading water. That takes guts when others are playing it safe."
 EXAMPLE RIGHT: "60% growth in exec search while the market contracted. That doesn't happen without something working differently at the top."
 
-Write it now. Punchy. Precise. Human.` }], 700, antKey);
+Write it now. Punchy. Precise. Human. Only reference what is verified.` }], 700, antKey);
     setStep('message', 'done');
   } catch(e) {
     setStep('message', 'err');

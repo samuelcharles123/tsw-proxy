@@ -526,13 +526,28 @@
       <div class="key-status" id="ant-status"></div>
     </div>
 
+    <div class="sidebar-section">
+      <span class="sidebar-label">Google Sheets API Key</span>
+      <input type="password" id="sheets-key" placeholder="AIza..." autocomplete="off" />
+      <div class="key-status" id="sheets-status"></div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Mode</span>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="setMode('single')" id="mode-single" style="flex:1;padding:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;border:0.5px solid var(--gold);background:var(--gold);color:var(--dark);border-radius:5px;cursor:pointer;">Single</button>
+        <button onclick="setMode('batch')" id="mode-batch" style="flex:1;padding:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;border:0.5px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.5);border-radius:5px;cursor:pointer;">Pipeline</button>
+      </div>
+    </div>
+
     <div class="sidebar-divider"></div>
 
     <div class="sidebar-section">
       <span class="sidebar-label">How it works</span>
       <p style="font-size:12px;color:rgba(255,255,255,0.35);line-height:1.8;">
-        Enter a company name.<br>
-        The agent searches 6 signal sources, scores each trigger, and writes a personalised outreach message in your voice.
+        <span id="mode-description">Enter a company name. The agent searches 6 signal sources, scores each trigger, and writes a personalised outreach message.</span>
       </p>
     </div>
 
@@ -545,10 +560,12 @@
   <main class="main">
 
     <div class="page-header">
-      <h1>Know your prospect<br>before you <em>reach out.</em></h1>
-      <p>Enter a UK company name to research their signals and generate a targeted outreach message.</p>
+      <h1 id="main-title">Know your prospect<br>before you <em>reach out.</em></h1>
+      <p id="main-subtitle">Enter a UK company name to research their signals and generate a targeted outreach message.</p>
     </div>
 
+    <!-- Single mode -->
+    <div id="single-mode">
     <div class="search-bar">
       <input type="text" id="company-input" placeholder="Enter a company name, e.g. Creature Comforts, Pleo, Depop..." />
       <button class="search-btn" id="run-btn" onclick="runAgent()">Research ↗</button>
@@ -567,7 +584,65 @@
 
     <div style="margin-bottom:32px;">
       <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Your own research <span style="opacity:0.5;">(paste LinkedIn posts, news snippets, anything you've spotted manually)</span></label>
-      <textarea id="extra-context" placeholder="e.g. CEO just posted about a leadership transition... new COO announced... Glassdoor review mentioning culture issues... anything you've found that the agent can't access directly." style="width:100%;padding:12px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;resize:vertical;min-height:90px;line-height:1.6;"></textarea>
+      <textarea id="extra-context" placeholder="e.g. CEO just posted about a leadership transition... new COO announced... Glassdoor review mentioning culture issues..." style="width:100%;padding:12px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:13px;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;resize:vertical;min-height:90px;line-height:1.6;"></textarea>
+    </div>
+    </div>
+
+    <!-- Batch / Pipeline mode -->
+    <div id="batch-mode" style="display:none;">
+      <div style="background:white;border:0.5px solid var(--light-line);border-radius:var(--border-radius-lg, 12px);padding:28px;margin-bottom:24px;">
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;">Pipeline Scoring — Sheet Settings</div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Google Sheet ID</label>
+          <input type="text" id="sheet-id" value="10_Cxht7o64ZEl947wAEYNT0hrqAEPGyz6hIQcX_x2_Y" style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:var(--cream);font-size:13px;font-family:monospace;color:var(--dark);outline:none;" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div>
+            <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Start row</label>
+            <input type="number" id="row-start" value="2" min="1" style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:14px;color:var(--dark);outline:none;" />
+          </div>
+          <div>
+            <label style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">End row</label>
+            <input type="number" id="row-end" value="10" min="1" style="width:100%;padding:9px 14px;border:0.5px solid var(--light-line);border-radius:6px;background:white;font-size:14px;color:var(--dark);outline:none;" />
+          </div>
+        </div>
+
+        <div style="background:var(--cream);border-radius:6px;padding:12px 16px;margin-bottom:20px;">
+          <div style="font-size:11px;color:var(--mid);line-height:1.8;">
+            <strong style="color:var(--dark);">Column mapping</strong><br>
+            A = Company name (reads from here)<br>
+            B = SLT tension / misalignment<br>
+            C = Scaling too fast / growing pains<br>
+            D = Culture breakdown<br>
+            E = Founder at inflection point<br>
+            F = Post-MBO / post-funding integration<br>
+            G = Disconnected / low energy team<br>
+            K = Evidence summary
+          </div>
+        </div>
+
+        <button class="search-btn" onclick="runBatch()" id="batch-btn" style="width:100%;padding:14px;">Score Pipeline ↗</button>
+      </div>
+
+      <!-- Batch progress -->
+      <div id="batch-progress" style="display:none;">
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Progress</div>
+        <div id="batch-overall-bar" style="height:4px;background:var(--light-line);border-radius:2px;margin-bottom:16px;">
+          <div id="batch-bar-fill" style="height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width 0.3s;"></div>
+        </div>
+        <div id="batch-rows" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <!-- Batch results summary -->
+      <div id="batch-results" style="display:none;margin-top:24px;">
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Results written to sheet</div>
+        <div id="batch-summary-grid" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div style="margin-top:16px;padding:12px 16px;background:var(--success-bg);border:0.5px solid #B4D8BE;border-radius:6px;font-size:13px;color:var(--success);">
+          ✓ All scores written to your Pipeline Scoring sheet. Open Google Sheets to review.
+        </div>
+      </div>
     </div>
 
     <div class="error-box" id="error-box"></div>
@@ -1061,9 +1136,172 @@ document.getElementById('ant-key').addEventListener('input', function() {
   else s.textContent = '';
 });
 
+document.getElementById('sheets-key').addEventListener('input', function() {
+  const s = document.getElementById('sheets-status');
+  if (this.value.startsWith('AIza')) { s.textContent = 'Key looks correct'; s.className = 'key-status ok'; }
+  else if (this.value.length > 5) { s.textContent = 'Should start with AIza'; s.className = 'key-status err'; }
+  else s.textContent = '';
+});
+
 document.getElementById('company-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') runAgent();
 });
+
+function setMode(mode) {
+  const isBatch = mode === 'batch';
+  document.getElementById('single-mode').style.display = isBatch ? 'none' : 'block';
+  document.getElementById('batch-mode').style.display = isBatch ? 'block' : 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('progress-section').style.display = 'none';
+  document.getElementById('mode-single').style.background = isBatch ? 'transparent' : 'var(--gold)';
+  document.getElementById('mode-single').style.color = isBatch ? 'rgba(255,255,255,0.5)' : 'var(--dark)';
+  document.getElementById('mode-single').style.borderColor = isBatch ? 'rgba(255,255,255,0.2)' : 'var(--gold)';
+  document.getElementById('mode-batch').style.background = isBatch ? 'var(--gold)' : 'transparent';
+  document.getElementById('mode-batch').style.color = isBatch ? 'var(--dark)' : 'rgba(255,255,255,0.5)';
+  document.getElementById('mode-batch').style.borderColor = isBatch ? 'var(--gold)' : 'rgba(255,255,255,0.2)';
+  document.getElementById('mode-description').textContent = isBatch
+    ? 'Reads company names from your Pipeline Scoring sheet, scores all 6 triggers for each, and writes results back automatically.'
+    : 'Enter a company name. The agent searches 6 signal sources, scores each trigger, and writes a personalised outreach message.';
+  document.getElementById('main-title').innerHTML = isBatch
+    ? 'Score your <em>pipeline.</em>'
+    : 'Know your prospect<br>before you <em>reach out.</em>';
+  document.getElementById('main-subtitle').textContent = isBatch
+    ? 'Select a row range from your Pipeline Scoring sheet and run all 6 trigger scores automatically.'
+    : 'Enter a UK company name to research their signals and generate a targeted outreach message.';
+}
+
+const SHEET_ID = '10_Cxht7o64ZEl947wAEYNT0hrqAEPGyz6hIQcX_x2_Y';
+const SHEET_TAB = 'pipeline scoring';
+const TRIGGER_COLS = ['B','C','D','E','F','G'];
+const TRIGGER_NAMES = ['slt_tension','scaling_too_fast','culture_breakdown','founder_inflection','post_mbo_integration','disconnected_team'];
+
+async function readSheetCompanies(sheetsKey, startRow, endRow) {
+  const range = encodeURIComponent(`${SHEET_TAB}!A${startRow}:A${endRow}`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${sheetsKey}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('Could not read sheet. Check your Google Sheets API key and that the sheet is public.');
+  const d = await r.json();
+  return (d.values || []).map((row, i) => ({ name: row[0] || '', row: startRow + i })).filter(c => c.name.trim());
+}
+
+async function writeScoresToSheet(sheetsKey, rowNum, triggers, evidence) {
+  const values = TRIGGER_NAMES.map(t => [triggers[t] || 'LOW']);
+  const triggerRange = `${SHEET_TAB}!B${rowNum}:G${rowNum}`;
+  const evidenceRange = `${SHEET_TAB}!K${rowNum}`;
+
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(triggerRange)}?valueInputOption=RAW&key=${sheetsKey}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ range: triggerRange, majorDimension: 'ROWS', values: [TRIGGER_NAMES.map(t => triggers[t] || 'LOW')] })
+  });
+
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(evidenceRange)}?valueInputOption=RAW&key=${sheetsKey}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ range: evidenceRange, majorDimension: 'ROWS', values: [[evidence]] })
+  });
+}
+
+async function runBatch() {
+  const sheetsKey = document.getElementById('sheets-key').value.trim();
+  const pplxKey = document.getElementById('pplx-key').value.trim();
+  const antKey = document.getElementById('ant-key').value.trim();
+  const startRow = parseInt(document.getElementById('row-start').value) || 2;
+  const endRow = parseInt(document.getElementById('row-end').value) || 10;
+
+  if (!sheetsKey || !sheetsKey.startsWith('AIza')) { alert('Please enter your Google Sheets API key in the sidebar.'); return; }
+  if (!pplxKey || !pplxKey.startsWith('pplx-')) { alert('Please enter your Perplexity API key in the sidebar.'); return; }
+  if (!antKey || !antKey.startsWith('sk-ant-')) { alert('Please enter your Anthropic API key in the sidebar.'); return; }
+
+  const btn = document.getElementById('batch-btn');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+
+  document.getElementById('batch-progress').style.display = 'block';
+  document.getElementById('batch-results').style.display = 'none';
+  document.getElementById('batch-rows').innerHTML = '';
+
+  let companies;
+  try {
+    companies = await readSheetCompanies(sheetsKey, startRow, endRow);
+  } catch(e) {
+    alert(e.message);
+    btn.disabled = false;
+    btn.textContent = 'Score Pipeline ↗';
+    return;
+  }
+
+  if (!companies.length) {
+    alert('No company names found in column A for the selected rows.');
+    btn.disabled = false;
+    btn.textContent = 'Score Pipeline ↗';
+    return;
+  }
+
+  const summaryResults = [];
+
+  for (let i = 0; i < companies.length; i++) {
+    const { name, row } = companies[i];
+    const pct = Math.round(((i) / companies.length) * 100);
+    document.getElementById('batch-bar-fill').style.width = pct + '%';
+
+    const rowEl = document.createElement('div');
+    rowEl.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border:0.5px solid var(--light-line);border-radius:6px;font-size:13px;';
+    rowEl.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1s infinite;flex-shrink:0;"></div><span style="flex:1;color:var(--dark);font-weight:500;">${name}</span><span style="color:var(--muted);font-size:11px;">Row ${row} — researching...</span>`;
+    document.getElementById('batch-rows').appendChild(rowEl);
+    rowEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    try {
+      const searches = {};
+      const companyRef = `the UK company "${name}"`;
+      const linkedInNote = '';
+
+      const searchQueries = [
+        { id: 'funding', q: `Find recent funding rounds and growth news for ${companyRef} in 2025-2026.` },
+        { id: 'hires', q: `Find recent senior leadership appointments at ${companyRef} in 2025-2026.` },
+        { id: 'posts', q: `Find who leads ${companyRef} and any recent public statements about leadership or culture in 2025-2026.` },
+        { id: 'glassdoor', q: `Find Glassdoor reviews for ${companyRef}. What are recurring themes about leadership and culture?` },
+        { id: 'news', q: `Find recent news and press coverage of ${companyRef} in 2025-2026.` },
+        { id: 'jobs', q: `Find current senior job listings at ${companyRef} — people, culture, HR, or leadership roles.` }
+      ];
+
+      for (const s of searchQueries) {
+        try { searches[s.id] = (await searchPerplexity(s.q, pplxKey)).content; }
+        catch(e) { searches[s.id] = 'No data.'; }
+      }
+
+      const raw = await callClaude([{ role: 'user', content: `Score the UK company "${name}" on these 6 leadership triggers based on the research below. Return ONLY raw JSON.
+
+FUNDING: ${searches.funding}
+HIRES: ${searches.hires}
+POSTS: ${searches.posts}
+GLASSDOOR: ${searches.glassdoor}
+NEWS: ${searches.news}
+JOBS: ${searches.jobs}
+
+Return: {"triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"2-3 sentence summary of key signals found."}` }], 600, antKey);
+
+      const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      await writeScoresToSheet(sheetsKey, row, parsed.triggers, parsed.evidence);
+
+      const priority = Object.values(parsed.triggers).filter(v => v === 'HIGH').length >= 2 ? 'HOT' :
+                       Object.values(parsed.triggers).filter(v => v === 'HIGH').length >= 1 ? 'WARM' : 'WATCH';
+
+      rowEl.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;"></div><span style="flex:1;color:var(--dark);font-weight:500;">${name}</span><span style="font-size:11px;padding:3px 10px;border-radius:10px;background:${priority==='HOT'?'var(--danger-bg)':priority==='WARM'?'var(--warn-bg)':'#F5F3EF'};color:${priority==='HOT'?'var(--danger)':priority==='WARM'?'var(--warn)':'var(--mid)'};">${priority}</span><span style="color:var(--muted);font-size:11px;">Row ${row} ✓</span>`;
+      summaryResults.push({ name, row, priority, triggers: parsed.triggers });
+
+    } catch(e) {
+      rowEl.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0;"></div><span style="flex:1;color:var(--dark);font-weight:500;">${name}</span><span style="color:var(--danger);font-size:11px;">Error — skipped</span>`;
+    }
+
+    await new Promise(r => setTimeout(r, 1500));
+  }
+
+  document.getElementById('batch-bar-fill').style.width = '100%';
+  document.getElementById('batch-results').style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'Score Pipeline ↗';
+}
 </script>
 </body>
 </html>

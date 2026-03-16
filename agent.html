@@ -623,6 +623,14 @@
         <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">Verify rating and quotes directly on Glassdoor before referencing in outreach.</p>
       </div>
 
+      <div id="health-block" style="display:none;background:white;border:0.5px solid var(--light-line);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem;">
+        <div style="margin-bottom:12px;">
+          <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);">Company health</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px;" id="health-indicators"></div>
+        <div id="health-summary" style="font-size:14px;line-height:1.75;color:var(--mid);"></div>
+      </div>
+
       <div class="section-divider"></div>
 
       <div class="message-block">
@@ -822,7 +830,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
 - Never quote or paraphrase something a person said unless it is explicitly in the search results above.
 
 Return this exact JSON:
-{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list any open senior roles found or 'None found'","glassdoor_rating":"the rating as stated e.g. 3.3/5 or 'Not found'","glassdoor_summary":"3-5 bullet points of actual themes from reviews — what are people saying in their own words about leadership, culture, management. Quote specific language where possible.","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
+{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list any open senior roles found or 'None found'","glassdoor_rating":"the rating as stated e.g. 3.3/5 or 'Not found'","glassdoor_summary":"3-5 bullet points of actual themes from reviews — what are people saying in their own words about leadership, culture, management. Quote specific language where possible.","health":{"revenue":"growing/flat/declining/unknown","headcount_trend":"growing/shrinking/stable/unknown","leadership_stability":"stable/in flux/unknown","market_position":"strong/mixed/weak/unknown","overall":"GREEN/AMBER/RED"},"health_summary":"2-3 sentences on overall company health — what the signals suggest about where this business is right now. Be direct and specific.","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
 
 HOT=2+ HIGH triggers. WARM=1 HIGH or 2+ MEDIUM. WATCH=LOW only.` }], 1000, antKey);
     scoreData = JSON.parse(raw.replace(/```json|```/g, '').trim());
@@ -860,10 +868,14 @@ NEVER USE THESE WORDS OR PHRASES — they are internal diagnostic labels, not ou
 "SLT tension", "scaling too fast", "culture breakdown", "founder inflection point", "post-MBO integration", "disconnected team", "leadership development", "coaching", "methodology", "framework", "soulful strategy", "Know Thyself"
 Instead — evoke the feeling of what they're experiencing without labelling it.
 
+NEVER USE THESE CLICHÉD ANALOGIES OR PHRASES — they are weak and dilute the message:
+"treading water", "riding the wave", "creating the wave", "ahead of the curve", "playing it safe", "taking the plunge", "moving the needle", "game changer", "journey", "passion", "at the end of the day", "in today's landscape", "it's clear that", "it goes without saying"
+Be direct. Say the thing plainly. No metaphors unless they are precise and specific.
+
 NEVER FABRICATE. If a key fact is marked [UNVERIFIED] do not reference it in the message at all. Only use confirmed, sourced information as specific observations. If little is verified, keep the observation general rather than specific.
 
-EXAMPLE WRONG: "I've been following your journey and what strikes me about your approach is how you've built something genuinely different..."
-EXAMPLE RIGHT: "You've built something rare. That takes a different kind of leadership."
+EXAMPLE WRONG: "60% growth while most firms are treading water. That takes guts when others are playing it safe."
+EXAMPLE RIGHT: "60% growth in exec search while the market contracted. That doesn't happen without something working differently at the top."
 
 Write it now. Punchy. Precise. Human.` }], 700, antKey);
     setStep('message', 'done');
@@ -915,6 +927,26 @@ function renderResults(d, message, companyName) {
     document.getElementById('glassdoor-block').style.display = 'block';
     document.getElementById('glassdoor-rating').textContent = d.glassdoor_rating || '';
     document.getElementById('glassdoor-reviews').textContent = d.glassdoor_summary;
+  }
+
+  if (d.health) {
+    document.getElementById('health-block').style.display = 'block';
+    const overallColor = d.health.overall === 'GREEN' ? 'var(--success-bg)' : d.health.overall === 'RED' ? 'var(--danger-bg)' : 'var(--warn-bg)';
+    const overallText = d.health.overall === 'GREEN' ? 'var(--success)' : d.health.overall === 'RED' ? 'var(--danger)' : 'var(--warn)';
+    const indicators = [
+      { label: 'Revenue', value: d.health.revenue },
+      { label: 'Headcount', value: d.health.headcount_trend },
+      { label: 'Leadership', value: d.health.leadership_stability },
+      { label: 'Market position', value: d.health.market_position },
+      { label: 'Overall', value: d.health.overall, bg: overallColor, color: overallText }
+    ];
+    document.getElementById('health-indicators').innerHTML = indicators.map(i =>
+      `<div style="padding:10px 12px;border-radius:6px;background:${i.bg||'var(--color-background-secondary, #f5f5f5)'};border:0.5px solid var(--light-line);">
+        <div style="font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${i.label}</div>
+        <div style="font-size:13px;font-weight:500;color:${i.color||'var(--dark)'};">${i.value||'Unknown'}</div>
+      </div>`
+    ).join('');
+    document.getElementById('health-summary').textContent = d.health_summary || '';
   }
 
   const paras = message.split('\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');

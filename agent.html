@@ -738,13 +738,15 @@
 
 <script>
 const STEPS = [
-  { id: 'funding', label: 'Funding & growth' },
+  { id: 'funding', label: 'Funding & corporate events' },
   { id: 'hires', label: 'Senior hires' },
   { id: 'posts', label: 'Founder posts' },
   { id: 'linkedin_activity', label: 'LinkedIn activity' },
   { id: 'glassdoor', label: 'Glassdoor signals' },
+  { id: 'reviews', label: 'Customer reviews' },
+  { id: 'producthunt', label: 'ProductHunt & launches' },
   { id: 'news', label: 'Press, blogs, podcasts & media' },
-  { id: 'jobs', label: 'Job listings' },
+  { id: 'jobs', label: 'Job listings & headcount' },
   { id: 'synthesise', label: 'Synthesising signals' },
   { id: 'message', label: 'Writing message' }
 ];
@@ -914,20 +916,37 @@ async function runAgent() {
     catch(e) { searches[id] = 'No data.'; setStep(id, 'err'); }
   };
 
-  await run('funding', 'Searching funding & growth...', `Find recent funding rounds, investment announcements and growth news for ${companyRef} in 2024-2025. Include round size, investors, growth plans and headcount changes.${linkedInNote}`);
-  await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at ${companyRef} in 2024-2025. First identify who currently founded and leads the company, then look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many new senior people have joined and how recently.${linkedInNote}`);
-  await run('posts', 'Searching founder posts...', contactLinkedIn 
+  await run('funding', 'Searching funding & corporate events...', `Find ALL recent corporate events for ${companyRef} in 2025-2026: funding rounds, investment announcements, mergers, acquisitions (as acquirer or target), MBOs, divestments, spin-outs, IPO activity, major partnerships, or any change of ownership or control. Include deal size, parties involved, and date. Also include general growth news and headcount changes.${linkedInNote}`);
+  await run('hires', 'Searching senior hires...', `Find recent senior leadership appointments at ${companyRef} in 2025-2026. First identify who currently founded and leads the company, then look for CEO, COO, CPO, CRO, CFO, VP and Head-of level hires. Note how many new senior people have joined and how recently.${linkedInNote}`);
+  await run('posts', 'Searching founder posts...', contactLinkedIn
     ? `Find recent LinkedIn posts, interviews or public statements by ${contactRef} in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture or personal growth.`
     : `First identify who founded and currently leads ${companyRef}. Then find their recent LinkedIn posts, interviews or public statements in 2025 and 2026. Look for reflective or honest content about leadership, team challenges, culture, scaling or personal growth. Include their name in your response.${linkedInNote}`);
-  await run('linkedin_activity', 'Searching LinkedIn activity...', `Search for recent publicly visible LinkedIn activity, announcements or posts from ${companyRef} leadership team in 2025 and 2026. Look for: leadership changes, new appointments, company announcements, cultural changes, expansion plans, or any posts where senior people share challenges or milestones. Include any names and roles mentioned.${linkedInNote}`);
-  await run('glassdoor', 'Searching Glassdoor...', `Find Glassdoor reviews for ${companyRef}. I need: (1) the current overall rating if available, (2) the actual text from recent reviews — quote specific pros and cons that employees have written, especially around leadership, management, culture, career progression, communication, and any sense of the company changing. Do NOT just give me a number — give me what people are actually saying in their own words.${linkedInNote}`);
-  await run('news', 'Searching press, blogs, podcasts & media...', `Find all public media presence for ${companyRef} in 2025-2026 across multiple channels:
-1. Press & news — articles, announcements, interviews in publications
-2. Blogs — company blog posts, founder Medium/Substack articles, thought leadership pieces
-3. Podcasts — any podcast appearances by the founder or CEO (search "[founder name] podcast" or "[company] podcast")
-4. YouTube — founder or company YouTube appearances, keynotes, panel talks, interviews
-5. Look specifically for: any language around culture, leadership challenges, team dynamics, burnout, scaling struggles, personal growth, vision, values, or identity. These are the highest-signal semantic indicators that the person is in a reflective moment and open to this kind of work.${linkedInNote}`);
-  await run('jobs', 'Searching job listings & headcount...', `Find current job listings for ${companyRef} across all sources including LinkedIn, Glassdoor, Indeed, Otta, Workable, Greenhouse, Lever, AngelList/Wellfound, and the company's own careers page. Focus on people, culture, HR, Chief of Staff, VP or C-suite roles — note if hiring multiple senior roles simultaneously. Also find any data on headcount growth or decline — LinkedIn employee count changes, layoff announcements, hiring freezes, or rapid team expansion in 2025-2026.${linkedInNote}`);
+  await run('linkedin_activity', 'Searching LinkedIn activity...', `Search for recent publicly visible LinkedIn activity from ${companyRef} leadership team in 2025 and 2026. Look for: leadership changes, new appointments, company announcements, cultural changes, expansion plans, or any posts where senior people share challenges or milestones.${linkedInNote}`);
+  await run('glassdoor', 'Searching Glassdoor...', `Find the Glassdoor profile for ${companyRef}. I need ALL of the following if available:
+1. Overall rating (out of 5)
+2. CEO approval rating (% who approve)
+3. % who would recommend to a friend
+4. Business outlook (positive %)
+5. Ratings by category: Culture & values, Work/life balance, Senior management, Diversity & inclusion, Career opportunities, Compensation & benefits
+6. Number of total reviews
+7. Actual review text — quote specific pros and cons employees have written, especially about leadership, management, culture, communication, and any sense of the company changing. Do NOT just give numbers — give what people are actually saying.${linkedInNote}`);
+  await run('reviews', 'Searching customer reviews...', `Find customer reviews for ${companyRef} across ALL of these platforms — search each one explicitly:
+- Trustpilot: search uk.trustpilot.com/review/[company domain]
+- Reevo
+- G2
+- Capterra / GetApp
+- Trustradius
+- Google Reviews
+- App Store / Google Play (if consumer product)
+For each platform found: overall rating, number of reviews, recent review themes. Quote specific customer language especially around complaints, service quality, reliability, or responsiveness. A declining score or surge of recent negatives often signals internal strain.${linkedInNote}`);
+  await run('producthunt', 'Searching ProductHunt & launches...', `Find any ProductHunt listings for ${companyRef} — include launch date, upvotes, and community comments. Also find any recent product launches, new features, or new product lines announced in 2025-2026 via press releases, blog posts, or tech media. Note the recency and frequency of launches as a signal of team velocity and scaling pressure.${linkedInNote}`);
+  await run('news', 'Searching press, blogs, podcasts & media...', `Find all public media presence for ${companyRef} in 2025-2026:
+1. Press & news articles
+2. Company blog posts, founder Medium/Substack
+3. Podcast appearances by the founder or CEO
+4. YouTube interviews, keynotes, panel talks
+5. Look for semantic signals: language around culture, leadership challenges, team dynamics, burnout, scaling struggles, personal growth, vision, values — these indicate psychological readiness.${linkedInNote}`);
+  await run('jobs', 'Searching job listings & headcount...', `Find current job listings for ${companyRef} across LinkedIn, Glassdoor, Indeed, Otta, Wellfound, Greenhouse, Lever, AngelList, and company careers page. Focus on people, culture, HR, Chief of Staff, VP or C-suite roles. Also find headcount growth/decline — LinkedIn employee count changes, layoff announcements, hiring freezes in 2025-2026.${linkedInNote}`);
 
   setStep('synthesise', 'active');
   document.getElementById('progress-label').textContent = 'Claude is synthesising all signals...';
@@ -936,13 +955,21 @@ async function runAgent() {
   try {
     const raw = await callClaude([{ role: 'user', content: `Analyse signal data about UK company "${company}" and return ONLY raw JSON, no markdown, no backticks.
 
-FUNDING: ${searches.funding}
+FUNDING & CORPORATE EVENTS: ${searches.funding}
 HIRES: ${searches.hires}
 FOUNDER POSTS: ${searches.posts}
 LINKEDIN ACTIVITY: ${searches.linkedin_activity}
 GLASSDOOR: ${searches.glassdoor}
+CUSTOMER REVIEWS (Trustpilot, Reevo, G2 etc): ${searches.reviews || 'Not searched'}
+PRODUCTHUNT & LAUNCHES: ${searches.producthunt || 'Not searched'}
 NEWS: ${searches.news}
 JOBS: ${searches.jobs}
+
+TRIGGER SCORING GUIDANCE:
+- post_mbo_integration: Score HIGH for ANY corporate event — merger, acquisition (as buyer or target), MBO, divestment, spin-out, change of majority ownership, or major new investor taking control. These all create the same integration and identity challenges. Do NOT score LOW just because it wasn't specifically an MBO.
+- founder_inflection: Score HIGH if podcast appearances, blog posts, or media contain language about leadership challenges, culture, burnout, personal growth, or values. Score HIGH if there is a major corporate event that would force identity shift.
+- culture_breakdown: Customer review signals (Trustpilot, G2 etc) count as evidence — declining scores or recurring service complaints often reflect internal strain.
+- scaling_too_fast: ProductHunt launches + rapid headcount growth + multiple senior hires simultaneously = HIGH.
 ${extraContext ? `\nADDITIONAL CONTEXT PROVIDED BY USER (treat this as highest priority — it is first-hand research):\n${extraContext}` : ''}
 
 CRITICAL ANTI-HALLUCINATION RULES:
@@ -953,7 +980,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
 - Never quote or paraphrase something a person said unless it is explicitly in the search results above.
 
 Return this exact JSON:
-{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","ceo_name":"full name of the CEO or founder currently leading the company, or 'Unknown'","ceo_linkedin":"their LinkedIn URL if found, or ''","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list specific open senior roles found across all job boards — include role title and source if known, or 'None found'","headcount_detail":"specific headcount signal — e.g. 'grew from 45 to 120 in 12 months', 'laid off 15% in Jan 2025', 'hiring freeze announced', or 'no data found'","media_appearances":"list any podcast appearances, YouTube interviews, blog posts or Substack articles by the founder or CEO found — include title/topic and channel. Or 'None found'","glassdoor_rating":"the rating as stated e.g. 3.3/5 or 'Not found'","glassdoor_summary":"3-5 bullet points of actual themes from reviews — what are people saying in their own words about leadership, culture, management. Quote specific language where possible.","health":{"revenue":"growing/flat/declining/unknown","headcount_trend":"growing/shrinking/stable/unknown","leadership_stability":"stable/in flux/unknown","market_position":"strong/mixed/weak/unknown","overall":"GREEN/AMBER/RED"},"health_summary":"2-3 sentences on overall company health — what the signals suggest about where this business is right now. Be direct and specific.","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
+{"company":"${company}","headcount":"range or unknown","funding_status":"brief stage and recency","ceo_name":"full name of the CEO or founder currently leading the company, or 'Unknown'","ceo_linkedin":"their LinkedIn URL if found, or ''","best_contact":"who to reach and why","priority":"HOT or WARM or WATCH","primary_trigger":"single most live challenge","open_roles":"list specific open senior roles found across all job boards — include role title and source if known, or 'None found'","headcount_detail":"specific headcount signal — e.g. 'grew from 45 to 120 in 12 months', 'laid off 15% in Jan 2025', 'hiring freeze announced', or 'no data found'","media_appearances":"list any podcast appearances, YouTube interviews, blog posts or Substack articles by the founder or CEO found — include title/topic and channel. Or 'None found'","glassdoor_rating":"overall rating e.g. 3.6/5 or 'Not found'","glassdoor_ceo_approval":"CEO approval % e.g. '64%' or 'Not found'","glassdoor_recommend":"% who would recommend e.g. '72%' or 'Not found'","glassdoor_outlook":"business outlook % e.g. '64% positive' or 'Not found'","glassdoor_categories":"ratings by category as a string e.g. 'Culture 4.0, Work/life 3.8, Senior mgmt 3.4, D&I 3.9, Career 3.7, Compensation 3.2' or 'Not found'","glassdoor_review_count":"total number of reviews e.g. '42' or 'Not found'","glassdoor_summary":"3-5 bullet points of actual themes from reviews — what are people saying in their own words about leadership, culture, management. Quote specific language where possible.","health":{"revenue":"growing/flat/declining/unknown","headcount_trend":"growing/shrinking/stable/unknown","leadership_stability":"stable/in flux/unknown — use CEO approval % and senior management rating from Glassdoor as key inputs: below 65% CEO approval or below 3.5 senior mgmt rating suggests instability","culture_health":"strong/mixed/weak/unknown — use Glassdoor culture & values rating and review themes: below 3.5 suggests issues","market_position":"strong/mixed/weak/unknown","overall":"GREEN/AMBER/RED — GREEN if most signals positive, AMBER if mixed signals or 1-2 concerning areas, RED if multiple concerning signals across headcount/culture/leadership"},"health_summary":"2-3 sentences on overall company health using the Glassdoor category data, headcount signals and business outlook specifically. Be direct and reference actual numbers where available.","triggers":{"slt_tension":"HIGH or MEDIUM or LOW","scaling_too_fast":"HIGH or MEDIUM or LOW","culture_breakdown":"HIGH or MEDIUM or LOW","founder_inflection":"HIGH or MEDIUM or LOW","post_mbo_integration":"HIGH or MEDIUM or LOW","disconnected_team":"HIGH or MEDIUM or LOW"},"evidence":"3-4 sentences using ONLY verified facts from the search data. If user-provided context is present, prioritise it. Never invent quotes or posts.","key_facts":["verified fact 1","verified fact 2","verified fact 3 or [UNVERIFIED] if uncertain"]}
 
 HOT=2+ HIGH triggers. WARM=1 HIGH or 2+ MEDIUM. WATCH=LOW only.
 Also consider psychological fit: if signals suggest "fix the team" mindset, blame-heavy narratives, or transaction-only thinking, note this as a RED SIGNAL in the evidence. If signals suggest openness to truth, reflective leadership, or genuine people investment, note as GREEN SIGNAL.
@@ -981,40 +1008,37 @@ KEY FACTS: ${(scoreData.key_facts||[]).join(', ')}
 BEST CONTACT: ${scoreData.best_contact}
 
 CRITICAL STYLE RULES:
-- Short punchy sentences. No sentence over 20 words.
-- No throat-clearing. Start with an observation that lands immediately.
-- Maximum 4 short paragraphs. Each paragraph 1-3 sentences only.
-- No adjective stacking. No "genuine, sustainable, thoughtful" type language.
-- First sentence must make them stop scrolling. Specific and direct.
-- Name the invisible human layer underneath the business problem. Never name the business problem itself.
-- One sentence on what we do. Plain. No jargon.
-- End with a variant of the core belief: to lead others you first need to know yourself. Frame it as an invitation. Never a slogan. Find the right words for this specific person and situation. Example: "The work we do starts with that question — who are you, really, underneath the role. If that resonates, I'd love a conversation." But always make it specific to them, not generic.
+- Short paragraphs, 2-3 sentences each. Never more.
+- Start with a specific observation — something real and external, not a presumption about their inner state.
+- Tone: warm, curious, inviting — not diagnostic. You are opening a door, not telling them what's behind it.
+- Never tell them what they're feeling or experiencing internally. Observe what's visible. Let them draw their own conclusions.
+- The message should feel like it comes from someone who has noticed something, not someone who has figured them out.
+- One soft sentence introducing what we do — anchor it in self-knowledge and its impact on the people and relationships around them, not on scale or performance.
+- Close with an invitation, not a pitch. Something that feels easy to respond to.
 
-NEVER USE THESE WORDS OR PHRASES — they are internal diagnostic labels, not outreach language:
-"SLT tension", "scaling too fast", "culture breakdown", "founder inflection point", "post-MBO integration", "disconnected team", "leadership development", "coaching", "methodology", "framework", "soulful strategy", "Know Thyself"
-Instead — evoke the feeling of what they're experiencing without labelling it.
+TONALITY — this is the most important instruction:
+The previous messages were too knowing, too formulaic, too presumptuous. Lines like "the machinery is working but the human questions get harder" or "who are you when you can't rely on proximity" are clever-sounding but land as clichéd and slightly confrontational. The person reading this should feel gently seen, not analysed. The tone should be more like a thoughtful person reaching out after noticing something interesting — not a consultant who has diagnosed their problem. Softer. More inquiring. Less certain.
 
-NEVER USE THESE CLICHÉD ANALOGIES OR PHRASES — they are weak and dilute the message:
-"treading water", "riding the wave", "creating the wave", "ahead of the curve", "playing it safe", "taking the plunge", "moving the needle", "game changer", "journey", "passion", "at the end of the day", "in today's landscape", "it's clear that", "it goes without saying", "that's the kind of", "makes everyone's job harder", "that takes guts", "that's no small feat", "no mean feat", "that's rare", "that doesn't happen by accident", "holding your breath", "or you're holding your breath"
+WHAT WE DO — how to introduce it:
+We help leaders understand themselves more deeply — their motivations, what quietly drains them, how they show up in their closest working relationships. That understanding tends to change everything around them. Frame it around curiosity and depth, not fixing or solving. Never use words like "work", "development", "coaching", "process", or "methodology."
 
-PRESUMPTION RULE — applies to every word in the message:
-Never tell the reader how they feel, what they're experiencing internally, or what they're lacking. You can observe what's visible from the outside — a leadership change, a funding round, a hiring pattern. You cannot presume what's happening inside them. Phrases like "you're holding your breath", "you must be exhausted", "I imagine this feels overwhelming", "you're probably questioning" are all presumptuous and will land badly. Observe. Don't project.
-Also never make observations that are trying to be clever or insightful but are actually generic — e.g. "Multiple entities showing up in searches creates confusion for clients and candidates" — this is filler, not insight. If you can't say something specific and true, say less.
-Be direct. Say the thing plainly. No metaphors unless they are precise and specific.
+NEVER USE THESE WORDS OR PHRASES:
+"SLT tension", "scaling too fast", "culture breakdown", "founder inflection point", "post-MBO integration", "disconnected team", "leadership development", "coaching", "methodology", "framework", "soulful strategy", "Know Thyself", "machinery", "human questions", "proximity", "inflection point"
 
-NEVER FABRICATE — THIS IS THE MOST IMPORTANT RULE:
-Do not invent specific details about LinkedIn posts, interviews, decisions, or events you were not explicitly given. Do not write things like "Looking at your posts about X" or "I noticed you mentioned Y" unless that exact information appears in the verified key facts above. LinkedIn posts are behind a login wall — Perplexity cannot read them. If you reference a post, you are making it up.
+NEVER USE THESE CLICHÉD PHRASES:
+"treading water", "riding the wave", "ahead of the curve", "playing it safe", "moving the needle", "game changer", "at the end of the day", "it's clear that", "that takes guts", "no mean feat", "that doesn't happen by accident", "holding your breath", "the hard part isn't", "that's where we come in"
 
-If a key fact is marked [UNVERIFIED] — do not use it. Period.
-If you have no verified specific facts — make the observation general, not specific. "You've been scaling fast" is fine. "I saw your post about losing 20% of the team" when you have no such source is fabrication and will destroy trust.
+PRESUMPTION RULE:
+Never tell the reader how they feel or what they're experiencing internally. Never ask them who they are — that's presumptuous and rude in a cold message. Observe what's visible. Let them draw their own conclusions. If you can't say something specific and true, say less.
 
-When in doubt: say less. A short, honest, general message is better than a specific fabricated one.
+NEVER FABRICATE:
+Do not reference LinkedIn posts, interviews, or internal decisions you were not explicitly given in the verified key facts. If a fact is marked [UNVERIFIED] — do not use it. When in doubt, say less.
 
-EXAMPLE WRONG: "Looking at your posts about losing that 20% and the therapy decision..."
-EXAMPLE WRONG: "60% growth while most firms are treading water. That takes guts when others are playing it safe."
-EXAMPLE RIGHT: "60% growth in exec search while the market contracted. That doesn't happen without something working differently at the top."
+EXAMPLE WRONG: "Recent board additions and a new CTO while hitting profitability. The machinery is working, but the human questions get harder. When founders scale past the point where they can know everyone's name, something shifts."
+EXAMPLE WRONG: "Who are you when you can't rely on proximity and personal relationships to hold it together?"
+EXAMPLE RIGHT (direction, not template): Notice something specific and real. Name it plainly. Introduce what we do with curiosity not certainty. Invite a conversation gently.
 
-Write it now. Punchy. Precise. Human. Only reference what is verified.` }], 700, antKey);
+Write it now. Soft. Specific. Inquiring. Only reference what is verified.` }], 700, antKey);
     setStep('message', 'done');
   } catch(e) {
     setStep('message', 'err');
@@ -1067,8 +1091,22 @@ function renderResults(d, message, companyName) {
 
   if (d.glassdoor_summary && d.glassdoor_summary !== 'Not found') {
     document.getElementById('glassdoor-block').style.display = 'block';
-    document.getElementById('glassdoor-rating').textContent = d.glassdoor_rating || '';
-    document.getElementById('glassdoor-reviews').textContent = d.glassdoor_summary;
+
+    const rating = d.glassdoor_rating || '';
+    const ceo = d.glassdoor_ceo_approval ? `CEO approval: ${d.glassdoor_ceo_approval}` : '';
+    const recommend = d.glassdoor_recommend ? `${d.glassdoor_recommend} recommend` : '';
+    const outlook = d.glassdoor_outlook ? `Outlook: ${d.glassdoor_outlook}` : '';
+    const reviewCount = d.glassdoor_review_count ? `${d.glassdoor_review_count} reviews` : '';
+
+    const metaLine = [rating, ceo, recommend, outlook, reviewCount].filter(Boolean).join(' · ');
+    document.getElementById('glassdoor-rating').textContent = metaLine;
+
+    let html = '';
+    if (d.glassdoor_categories && d.glassdoor_categories !== 'Not found') {
+      html += `<div style="font-size:12px;color:var(--mid);margin-bottom:10px;padding:8px 12px;background:var(--cream);border-radius:5px;">${d.glassdoor_categories}</div>`;
+    }
+    html += `<div style="font-size:14px;line-height:1.75;color:var(--mid);white-space:pre-wrap;">${d.glassdoor_summary}</div>`;
+    document.getElementById('glassdoor-reviews').innerHTML = html;
   }
 
   if (d.health) {
@@ -1079,6 +1117,7 @@ function renderResults(d, message, companyName) {
       { label: 'Revenue', value: d.health.revenue },
       { label: 'Headcount', value: d.health.headcount_trend },
       { label: 'Leadership', value: d.health.leadership_stability },
+      { label: 'Culture', value: d.health.culture_health },
       { label: 'Market position', value: d.health.market_position },
       { label: 'Overall', value: d.health.overall, bg: overallColor, color: overallText }
     ];
@@ -1307,6 +1346,8 @@ async function runBatch() {
         { id: 'posts', q: `Find who leads ${companyRef} and any recent public statements about leadership or culture in 2025-2026.` },
         { id: 'glassdoor', q: `Find Glassdoor reviews for ${companyRef}. What are recurring themes about leadership and culture?` },
         { id: 'news', q: `Find all public media presence for ${companyRef} in 2025-2026: news articles, company blog posts, founder Substack or Medium articles, podcast appearances by the founder or CEO, and YouTube interviews or keynotes. Look for any language around culture, leadership challenges, scaling struggles, burnout, personal growth or vision — these are key semantic signals.` },
+        { id: 'reviews', q: `Find customer reviews for ${companyRef} on Trustpilot, Reevo, G2, Capterra, and Google Reviews. Overall rating, number of reviews, and key themes from recent reviews.` },
+        { id: 'producthunt', q: `Find ProductHunt listings for ${companyRef} and any product launches or new features announced in 2025-2026.` },
         { id: 'jobs', q: `Find current job listings for ${companyRef} across LinkedIn, Glassdoor, Indeed, Otta, Wellfound, Greenhouse, Lever and the company careers page. Focus on people, culture, HR, Chief of Staff or leadership roles. Also find any headcount growth or decline data — employee count changes, layoffs, or hiring freezes in 2025-2026.` }
       ];
 
@@ -1317,10 +1358,12 @@ async function runBatch() {
 
       const raw = await callClaude([{ role: 'user', content: `Score the UK company "${name}" on these 6 leadership triggers based on the research below. Return ONLY raw JSON.
 
-FUNDING: ${searches.funding}
+FUNDING & CORPORATE EVENTS: ${searches.funding}
 HIRES: ${searches.hires}
 POSTS: ${searches.posts}
 GLASSDOOR: ${searches.glassdoor}
+CUSTOMER REVIEWS: ${searches.reviews || 'Not searched'}
+PRODUCTHUNT: ${searches.producthunt || 'Not searched'}
 NEWS: ${searches.news}
 JOBS: ${searches.jobs}
 
